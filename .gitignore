@@ -1,0 +1,13 @@
+.DS_Store
+
+
+/env/
+/venv/
+/logs/
+
+
+*.pyc
+__pycache__/
+*.log
+
+config.yaml
