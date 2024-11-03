@@ -3,14 +3,14 @@ from config import CFG
 import os
 
 
-def InitLogger():
+def init_logger():
     # 创建 logs 文件夹
     if not os.path.exists("logs"):
         os.makedirs("logs")
     # 配置 logger
     logger.remove()
     logger.add(
-        "logs/logfile.log", 
+        "logs/api.log", 
         rotation=CFG.log.rotation, 
         retention=CFG.log.retention, 
         level=CFG.log.level, 

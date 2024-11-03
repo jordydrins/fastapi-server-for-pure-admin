@@ -1,19 +1,23 @@
 from fastapi import FastAPI
-from initialize.int_logger import InitLogger
-from config import CFG,CFG_LOG
-from router.rou_health import router_api
+from initialize.int_main import cleanup,creat_app
+
 
 app = FastAPI()
 
 
-# 赋值给全局日志对象
-CFG_LOG = InitLogger()
-# 注册路由
-app.include_router(router_api)
+@app.on_event("startup")
+async def startup_event():
+    creat_app(app)
+    
+    
+
+@app.on_event("shutdown")
+def shutdown_event():
+    observer = app.state.observer
+    cleanup(observer)
 
 
 # 启动应用
-if __name__ == "__main__":
-    import uvicorn
-    CFG_LOG.info("Starting FastAPI server...")
-    uvicorn.run(app, host="0.0.0.0", port=8585)
+# if __name__ == "__main__":
+#     print('▶️  ------启动服务------')
+#     run(app, host="0.0.0.0", port=8585)

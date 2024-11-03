@@ -5,7 +5,7 @@ from service import serviceHealth # 引用实例
 router = APIRouter()
 
 @router.get('/')
-async def GetHealth(goMsg: str):
+async def get_health(goMsg: str):
     #LOG.info(f"Fetching data for user {user_id}")
-    resultData = serviceHealth.GetHealth()
+    resultData = serviceHealth.get_health()
     return {'code': goMsg,'data':resultData}
