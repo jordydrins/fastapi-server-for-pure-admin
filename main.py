@@ -1,21 +1,27 @@
 from fastapi import FastAPI
-from initialize.int_main import cleanup,creat_app
+from initialize.int_main import create_app,clean_app
+from config import conf
+
 
 
 app = FastAPI()
 
 
+
 @app.on_event("startup")
 async def startup_event():
-    creat_app(app)
-    
-    
+    create_app(app)
+
+
 
 @app.on_event("shutdown")
 def shutdown_event():
-    observer = app.state.observer
-    cleanup(observer)
+    clean_app(app)
 
+
+@app.get('/')
+async def index_url():
+    return {'msg':app.state.config.test}
 
 # 启动应用
 # if __name__ == "__main__":

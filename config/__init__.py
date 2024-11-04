@@ -1,17 +1,15 @@
 import yaml
-from loguru import logger
 from .cfg_logger import ConfigLogger
 from .cfg_pgsql import ConfigDb
+from .cfg_test import ConfigTest
 
 # 全局变量
 configName = 'config.yaml'
-CFG = None
-CFG_LOG = logger
-
 class Config:
-    def __init__(self, log: ConfigLogger,db: ConfigDb):
+    def __init__(self, log: ConfigLogger,db: ConfigDb,test: ConfigTest):
         self.log = log
         self.db = db
+        self.test = test
     
     def load_config(self):
         try:
@@ -20,15 +18,16 @@ class Config:
                 if config is None:
                     print("❌ 加载的配置为空，请检查 YAML 文件内容")
                 
-                configLog = config.get('log', {})
-                configDb = config.get('db', {})
+                config_log = config.get('log', {})
+                config_db = config.get('db', {})
+                config_test = config.get('test', "")
 
-                self.log = ConfigLogger(**configLog)
-                self.db = ConfigDb(**configDb)
+                self.log = ConfigLogger(**config_log)
+                self.db = ConfigDb(**config_db)
+                self.test = ConfigTest(config_test)
 
-                global CFG
-                CFG = self
                 print("✅ Config 成功加载")
+                return self
                 
         except FileNotFoundError:
             print("❌ config.yaml 配置文件未找到")
@@ -38,7 +37,7 @@ class Config:
             print("❌ 加载配置时出现错误:", e)
 
 
-conf = Config(ConfigLogger,ConfigDb)
-conf.load_config()
+conf = Config(ConfigLogger,ConfigDb,ConfigTest)
+#conf.load_config()
 
 
