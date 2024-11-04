@@ -3,6 +3,7 @@
 
 /env/
 /venv/
+/pureenv/
 /logs/
 
 

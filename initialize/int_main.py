@@ -1,37 +1,33 @@
 
 
 from fastapi import FastAPI
-from time import sleep
+from time import sleep,time
 from config import CFG
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 from threading import Thread
-from sys import exit
 from config import Config
 from initialize.int_logger import init_logger
 from router.rou_health import router_api
-from threading import Lock
-import hashlib
+
 
 
 class ConfigFileHandler(FileSystemEventHandler):  
     def __init__(self):
         super().__init__()  # 确保父类初始化
-        self.configName = 'config.yaml'
+        self.configName = './config.yaml'
         self.config = CFG # 使用全局配置实例 
-        self.last_hash = None
+        self.last_modified_time = 0  # 上次修改时间(因为文件系统保存会触发2次，所以设定间隔，1秒内只更新1次)
   
-    def file_hash(self, filepath):
-        with open(filepath, 'rb') as f:
-            return hashlib.md5(f.read()).hexdigest()
-        
     def on_modified(self, event):
-        if event.src_path == f'.\{self.configName}':
-            #current_hash = self.file_hash(event.src_path)
-            #if current_hash != self.last_hash:
-            #    self.last_hash = current_hash
+        if event.src_path == f'{self.configName}':
             sleep(0.1)  # 等待文件写入稳定
-            self.config.load_config()
+            current_time = time()
+            # 检查文件是否在1秒内被修改
+            if current_time - self.last_modified_time > 1:
+                self.last_modified_time = current_time
+                print('▶️  Config 发生变化，开始重载')
+                self.config.load_config()
                 
         else:
             pass
@@ -45,6 +41,7 @@ def start_config_watcher(observer):
     observer_thread = Thread(target=observer.start)
     observer_thread.daemon = True
     observer_thread.start()
+    print('▶️  YAML监控启动')
 
 
 def creat_app(app):
@@ -54,6 +51,7 @@ def creat_app(app):
     CFG_LOG = init_logger()
     # 注册路由
     app.include_router(router_api)
+    print('✅ Router 注册完成')
     #app.include_router(custom_bp)
     #return app
     app.state.observer = observer
@@ -61,4 +59,4 @@ def creat_app(app):
 def cleanup(observer):
     observer.stop()
     observer.join()
-    print("⏹️  YAML监控已停止")
+    print("⏹️  YAML监控停止")

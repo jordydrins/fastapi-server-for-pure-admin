@@ -14,7 +14,6 @@ class Config:
         self.db = db
     
     def load_config(self):
-        print('重载')
         try:
             with open(configName, 'r', encoding='utf-8') as f:
                 config = yaml.safe_load(f)
